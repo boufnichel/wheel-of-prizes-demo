@@ -21,6 +21,10 @@ const WheelSpinner = () => {
     setSegments(segments.filter((_, i) => i !== index));
   };
 
+  const getColors = () => {
+    return segments.map((_, index) => segColors[index % segColors.length]);
+  };
+
   return (
     <div className="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-6">
       <div className="mb-4">
@@ -56,7 +60,7 @@ const WheelSpinner = () => {
       {segments.length > 0 && (
         <WheelComponent
           segments={segments}
-          segColors={segColors}
+          segColors={getColors()}
           onFinished={(winner) => alert(`Winner: ${winner}`)}
           primaryColor="black"
           contrastColor="white"
