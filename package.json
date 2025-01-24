@@ -14,8 +14,8 @@
     "react-wheel-of-prizes": "^1.1.0"
   },
   "devDependencies": {
-    "@types/react": "^16.14.0",
-    "@types/react-dom": "^16.14.0",
+    "@types/react": "^16.9.56",
+    "@types/react-dom": "^16.9.9",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
