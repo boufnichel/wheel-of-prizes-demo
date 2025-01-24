@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WheelComponent from 'react-wheel-of-prizes';
-
-const COLORS = ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F', '#F9AA1F', '#EC3F3F', '#FF9000'];
 
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
+  const [key, setKey] = useState(0);
+  
+  useEffect(() => {
+    setKey(prev => prev + 1);
+  }, [segments]);
 
   const addSegment = () => {
     if (newSegment.trim()) {
@@ -17,8 +20,6 @@ const WheelSpinner = () => {
   const removeSegment = (index) => {
     setSegments(segments.filter((_, i) => i !== index));
   };
-
-  const wheelColors = segments.map((_, index) => COLORS[index % COLORS.length]);
 
   return (
     <div className="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-6">
@@ -45,18 +46,20 @@ const WheelSpinner = () => {
       </div>
 
       {segments.length > 0 && (
-        <WheelComponent
-          segments={segments}
-          segColors={wheelColors}
-          onFinished={(winner) => alert(`Winner: ${winner}`)}
-          primaryColor="black"
-          contrastColor="white"
-          buttonText="SPIN"
-          isOnlyOnce={false}
-          size={290}
-          upDuration={100}
-          downDuration={1000}
-        />
+        <div key={key}>
+          <WheelComponent
+            segments={segments}
+            segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
+            onFinished={(winner) => alert(`Winner: ${winner}`)}
+            primaryColor="black"
+            contrastColor="white"
+            buttonText="SPIN"
+            isOnlyOnce={false}
+            size={290}
+            upDuration={100}
+            downDuration={1000}
+          />
+        </div>
       )}
     </div>
   );
