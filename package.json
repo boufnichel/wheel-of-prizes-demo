@@ -11,7 +11,8 @@
   "dependencies": {
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "react-wheel-of-prizes": "1.0.9"
+    "react-wheel-of-prizes": "1.0.9",
+    "lucide-react": "^0.323.0"
   },
   "devDependencies": {
     "@types/react": "^16.9.56",
