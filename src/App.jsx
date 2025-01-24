@@ -1,6 +1,5 @@
 import React from 'react'
 import WheelSpinner from './components/WheelSpinner'
-import './App.css'
 
 function App() {
   return (
