@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Box, 
   Button, 
@@ -9,8 +9,7 @@ import {
   Container,
   Dialog,
   DialogTitle,
-  DialogContent,
-  DialogActions
+  DialogContent
 } from '@mui/material';
 import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
@@ -21,6 +20,8 @@ const WheelSpinner = () => {
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
+  const spinningSound = useRef(new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'));
+  const celebrationSound = useRef(new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'));
   
   useEffect(() => {
     setKey(prev => prev + 1);
@@ -53,9 +54,26 @@ const WheelSpinner = () => {
     frame();
   };
 
+  const playSpinningSound = () => {
+    spinningSound.current.currentTime = 0;
+    spinningSound.current.play().catch(() => {});
+  };
+
+  const playCelebrationSound = () => {
+    celebrationSound.current.currentTime = 0;
+    celebrationSound.current.play().catch(() => {});
+  };
+
   const handleWinner = (winner) => {
     setWinner(winner);
     triggerConfetti();
+    playCelebrationSound();
+  };
+
+  const handleSpin = () => {
+    if (segments.length > 0) {
+      playSpinningSound();
+    }
   };
 
   const addSegment = () => {
@@ -146,6 +164,7 @@ const WheelSpinner = () => {
                 size={290}
                 upDuration={100}
                 downDuration={1000}
+                onSpin={handleSpin}
               />
             </div>
           ) : (
@@ -172,16 +191,6 @@ const WheelSpinner = () => {
             {winner}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button 
-            onClick={() => setWinner(null)} 
-            variant="contained" 
-            color="primary"
-            size="large"
-          >
-            Spin Again
-          </Button>
-        </DialogActions>
       </Dialog>
     </Container>
   );
