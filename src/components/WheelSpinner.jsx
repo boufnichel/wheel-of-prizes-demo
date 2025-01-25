@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, X, RotateCw } from 'lucide-react';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  IconButton, 
+  Typography,
+  Stack,
+  Container
+} from '@mui/material';
+import { Add, Delete, Refresh } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 
 const WheelSpinner = () => {
@@ -23,61 +32,69 @@ const WheelSpinner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="grid md:grid-cols-2 gap-8 max-w-7xl mx-auto">
+    <Container maxWidth="xl">
+      <Stack direction="row" spacing={4} alignItems="start" sx={{ mt: 4 }}>
         {/* Left Panel - List Management */}
-        <div className="bg-white rounded-xl shadow-lg p-6 h-fit">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Wheel Items</h2>
+        <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
+          <Typography variant="h5" gutterBottom>
+            Wheel Items
+          </Typography>
           
-          <div className="space-y-6">
-            {/* Add new item */}
-            <div className="relative">
-              <input
+          <Stack spacing={3}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                fullWidth
                 value={newSegment}
                 onChange={(e) => setNewSegment(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addSegment()}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 placeholder="Enter new item"
+                size="small"
               />
-              <button
+              <Button
+                variant="contained"
                 onClick={addSegment}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-blue-600 hover:text-blue-700"
-                title="Add item"
+                startIcon={<Add />}
               >
-                <PlusCircle size={24} />
-              </button>
-            </div>
+                Add
+              </Button>
+            </Box>
 
-            {/* Items list */}
-            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            <Stack spacing={1} sx={{ maxHeight: 400, overflow: 'auto' }}>
               {segments.map((segment, index) => (
-                <div
+                <Box
                   key={index}
-                  className="group flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  sx={{
+                    p: 2,
+                    bgcolor: 'grey.50',
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
                 >
-                  <span className="font-medium text-gray-700">{segment}</span>
-                  <button
+                  <Typography>{segment}</Typography>
+                  <IconButton
                     onClick={() => removeSegment(index)}
-                    className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove item"
+                    size="small"
+                    color="error"
                   >
-                    <X size={20} />
-                  </button>
-                </div>
+                    <Delete />
+                  </IconButton>
+                </Box>
               ))}
               
               {segments.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <RotateCw size={32} className="mx-auto mb-2 opacity-50" />
-                  <p>Add items to start spinning the wheel</p>
-                </div>
+                <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  <Refresh sx={{ mb: 1, opacity: 0.5 }} />
+                  <Typography>Add items to start spinning the wheel</Typography>
+                </Box>
               )}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Stack>
+        </Box>
 
         {/* Right Panel - Wheel */}
-        <div className="bg-white rounded-xl shadow-lg p-6 flex items-center justify-center min-h-[500px]">
+        <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {segments.length > 0 ? (
             <div key={key}>
               <WheelComponent
@@ -94,14 +111,14 @@ const WheelSpinner = () => {
               />
             </div>
           ) : (
-            <div className="text-center text-gray-500">
-              <RotateCw size={48} className="mx-auto mb-3 opacity-50" />
-              <p className="text-lg">Wheel will appear here</p>
-            </div>
+            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+              <Refresh sx={{ fontSize: 40, mb: 2, opacity: 0.5 }} />
+              <Typography>Wheel will appear here</Typography>
+            </Box>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Stack>
+    </Container>
   );
 };
 
