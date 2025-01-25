@@ -9,24 +9,64 @@ import {
   Container,
   Dialog,
   DialogTitle,
-  DialogContent
+  DialogContent,
+  CircularProgress,
+  Alert
 } from '@mui/material';
-import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
+import { Add, Delete, Refresh, Celebration, Public } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 import confetti from 'canvas-confetti';
 
-const spinningSound = new Audio('/spinning.mp3');
 const winningSound = new Audio('/winning.mp3');
+
+const COLORS = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFBE0B',
+  '#FB5607', '#FF006E', '#8338EC', '#3A86FF', '#38B000',
+  '#9381FF', '#B5179E', '#F15BB5', '#FEE440', '#00BBF9',
+  '#FF99C8', '#00F5D4', '#A0C4FF', '#D4A373', '#FF477E'
+];
 
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
+
+  const loadEuropeanCountries = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('https://restcountries.com/v3.1/region/europe');
+      if (!response.ok) throw new Error('Failed to fetch countries');
+      const data = await response.json();
+      
+      // Extract country names and sort alphabetically
+      const countries = data
+        .map(country => country.name.common)
+        .sort((a, b) => a.localeCompare(b));
+      
+      setSegments(countries);
+    } catch (err) {
+      setError('Failed to load countries. Please try again.');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRandomColors = (count) => {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      colors.push(COLORS[Math.floor(Math.random() * COLORS.length)]);
+    }
+    return colors;
+  };
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -38,14 +78,14 @@ const WheelSpinner = () => {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+        colors: COLORS
       });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+        colors: COLORS
       });
 
       if (Date.now() < end) {
@@ -55,13 +95,7 @@ const WheelSpinner = () => {
     frame();
   };
 
-  const handleStartSpin = () => {
-    spinningSound.currentTime = 0;
-    spinningSound.play();
-  };
-
   const handleWinner = (winner) => {
-    spinningSound.pause();
     winningSound.currentTime = 0;
     winningSound.play();
     setWinner(winner);
@@ -84,9 +118,23 @@ const WheelSpinner = () => {
       <Stack direction="row" spacing={4} alignItems="start" sx={{ mt: 4 }}>
         {/* Left Panel - List Management */}
         <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
-          <Typography variant="h5" gutterBottom>
-            Wheel Items
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={2} mb={3}>
+            <Typography variant="h5">Wheel Items</Typography>
+            <Button
+              variant="outlined"
+              startIcon={<Public />}
+              onClick={loadEuropeanCountries}
+              disabled={loading}
+            >
+              Load EU Countries
+            </Button>
+          </Stack>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           
           <Stack spacing={3}>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -97,41 +145,47 @@ const WheelSpinner = () => {
                 onKeyPress={(e) => e.key === 'Enter' && addSegment()}
                 placeholder="Enter new item"
                 size="small"
+                disabled={loading}
               />
               <Button
                 variant="contained"
                 onClick={addSegment}
                 startIcon={<Add />}
+                disabled={loading}
               >
                 Add
               </Button>
             </Box>
 
             <Stack spacing={1} sx={{ maxHeight: 400, overflow: 'auto' }}>
-              {segments.map((segment, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    p: 2,
-                    bgcolor: 'grey.50',
-                    borderRadius: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <Typography>{segment}</Typography>
-                  <IconButton
-                    onClick={() => removeSegment(index)}
-                    size="small"
-                    color="error"
-                  >
-                    <Delete />
-                  </IconButton>
+              {loading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
                 </Box>
-              ))}
-              
-              {segments.length === 0 && (
+              ) : segments.length > 0 ? (
+                segments.map((segment, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      p: 2,
+                      bgcolor: 'grey.50',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <Typography>{segment}</Typography>
+                    <IconButton
+                      onClick={() => removeSegment(index)}
+                      size="small"
+                      color="error"
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                ))
+              ) : (
                 <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
                   <Refresh sx={{ mb: 1, opacity: 0.5 }} />
                   <Typography>Add items to start spinning the wheel</Typography>
@@ -147,16 +201,15 @@ const WheelSpinner = () => {
             <div key={key}>
               <WheelComponent
                 segments={segments}
-                segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
+                segColors={getRandomColors(segments.length)}
                 onFinished={handleWinner}
                 primaryColor="black"
                 contrastColor="white"
-                buttonText="SPIN"
+                buttonText="DEWER"
                 isOnlyOnce={false}
                 size={290}
-                upDuration={100}
-                downDuration={1000}
-                onSpin={handleStartSpin}
+                upDuration={15}
+                downDuration={200}
               />
             </div>
           ) : (
