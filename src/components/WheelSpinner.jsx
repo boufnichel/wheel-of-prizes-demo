@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Button, 
@@ -23,38 +23,16 @@ const WheelSpinner = () => {
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
-  const wheelRef = useRef(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
-  }, [segments]);
 
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.addedNodes.length) {
-          mutation.addedNodes.forEach((node) => {
-            if (node.classList?.contains('wheel-spin-button')) {
-              node.addEventListener('click', handleStartSpin);
-            }
-          });
-        }
-      });
-    });
-
-    if (wheelRef.current) {
-      observer.observe(wheelRef.current, {
-        childList: true,
-        subtree: true
-      });
-    }
-
+    // Cleanup function
     return () => {
-      observer.disconnect();
       spinningSound.pause();
       winningSound.pause();
     };
-  }, [key]); // Re-run when wheel is re-rendered
+  }, [segments]);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -83,13 +61,9 @@ const WheelSpinner = () => {
     frame();
   };
 
-  const handleStartSpin = () => {
-    spinningSound.currentTime = 0;
-    spinningSound.play();
-  };
-
   const handleWinner = (winner) => {
     spinningSound.pause();
+    spinningSound.currentTime = 0;
     winningSound.currentTime = 0;
     winningSound.play();
     setWinner(winner);
@@ -106,6 +80,27 @@ const WheelSpinner = () => {
   const removeSegment = (index) => {
     setSegments(segments.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          const spinButton = document.querySelector('canvas + button');
+          if (spinButton) {
+            spinButton.addEventListener('click', () => {
+              spinningSound.currentTime = 0;
+              spinningSound.play();
+            });
+            observer.disconnect();
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Container maxWidth="xl">
@@ -172,7 +167,7 @@ const WheelSpinner = () => {
         {/* Right Panel - Wheel */}
         <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {segments.length > 0 ? (
-            <div key={key} ref={wheelRef}>
+            <div key={key}>
               <WheelComponent
                 segments={segments}
                 segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
