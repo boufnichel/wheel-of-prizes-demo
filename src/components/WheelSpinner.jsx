@@ -9,12 +9,14 @@ import {
   Container,
   Dialog,
   DialogTitle,
-  DialogContent,
-  DialogActions
+  DialogContent
 } from '@mui/material';
 import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 import confetti from 'canvas-confetti';
+
+const spinningSound = new Audio('/spinning.mp3');
+const winningSound = new Audio('/winning.mp3');
 
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
@@ -53,7 +55,15 @@ const WheelSpinner = () => {
     frame();
   };
 
+  const handleStartSpin = () => {
+    spinningSound.currentTime = 0;
+    spinningSound.play();
+  };
+
   const handleWinner = (winner) => {
+    spinningSound.pause();
+    winningSound.currentTime = 0;
+    winningSound.play();
     setWinner(winner);
     triggerConfetti();
   };
@@ -146,6 +156,7 @@ const WheelSpinner = () => {
                 size={290}
                 upDuration={100}
                 downDuration={1000}
+                onSpin={handleStartSpin}
               />
             </div>
           ) : (
@@ -172,16 +183,6 @@ const WheelSpinner = () => {
             {winner}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button 
-            onClick={() => setWinner(null)} 
-            variant="contained" 
-            color="primary"
-            size="large"
-          >
-            Spin Again
-          </Button>
-        </DialogActions>
       </Dialog>
     </Container>
   );
