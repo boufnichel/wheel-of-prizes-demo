@@ -23,26 +23,38 @@ const WheelSpinner = () => {
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
-  const spinButtonRef = useRef(null);
+  const wheelRef = useRef(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
 
   useEffect(() => {
-    const button = document.querySelector('.wheel-spin-button');
-    if (button) {
-      button.addEventListener('click', handleStartSpin);
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+          mutation.addedNodes.forEach((node) => {
+            if (node.classList?.contains('wheel-spin-button')) {
+              node.addEventListener('click', handleStartSpin);
+            }
+          });
+        }
+      });
+    });
+
+    if (wheelRef.current) {
+      observer.observe(wheelRef.current, {
+        childList: true,
+        subtree: true
+      });
     }
 
     return () => {
-      if (button) {
-        button.removeEventListener('click', handleStartSpin);
-      }
+      observer.disconnect();
       spinningSound.pause();
       winningSound.pause();
     };
-  }, []);
+  }, [key]); // Re-run when wheel is re-rendered
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -160,7 +172,7 @@ const WheelSpinner = () => {
         {/* Right Panel - Wheel */}
         <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {segments.length > 0 ? (
-            <div key={key}>
+            <div key={key} ref={wheelRef}>
               <WheelComponent
                 segments={segments}
                 segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
