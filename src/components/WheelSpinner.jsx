@@ -15,6 +15,8 @@ import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 import confetti from 'canvas-confetti';
 
+const WHEEL_DURATION = 3000;
+
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
@@ -23,23 +25,43 @@ const WheelSpinner = () => {
   const spinningSound = useRef(new Audio('/spinning.mp3'));
   const winningSound = useRef(new Audio('/winning.mp3'));
   const spinTimeoutRef = useRef(null);
-  
-  useEffect(() => {
-    setKey(prev => prev + 1);
-  }, [segments]);
 
   useEffect(() => {
+    spinningSound.current.loop = true;
     return () => {
-      if (spinTimeoutRef.current) {
-        clearTimeout(spinTimeoutRef.current);
-      }
+      if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
       spinningSound.current.pause();
       winningSound.current.pause();
     };
   }, []);
 
+  const handleStartSpin = () => {
+    console.log('Spin started');
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+    }
+    spinningSound.current.currentTime = 0;
+    spinningSound.current.play().catch(console.error);
+  };
+
+  const handleWinner = (winner) => {
+    console.log('Winner selected');
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+    }
+    spinningSound.current.pause();
+    spinningSound.current.currentTime = 0;
+    
+    winningSound.current.currentTime = 0;
+    winningSound.current.play().catch(console.error);
+    
+    setWinner(winner);
+    triggerConfetti();
+  };
+
+  // Rest of the component remains the same
   const triggerConfetti = () => {
-    const duration = 3000;
+    const duration = WHEEL_DURATION;
     const end = Date.now() + duration;
 
     const frame = () => {
@@ -63,32 +85,6 @@ const WheelSpinner = () => {
       }
     };
     frame();
-  };
-
-  const handleStartSpin = () => {
-    if (spinTimeoutRef.current) {
-      clearTimeout(spinTimeoutRef.current);
-    }
-    spinningSound.current.currentTime = 0;
-    spinningSound.current.play();
-    
-    // Set timeout to match wheel animation duration
-    spinTimeoutRef.current = setTimeout(() => {
-      spinningSound.current.pause();
-      spinningSound.current.currentTime = 0;
-    }, 3000);
-  };
-
-  const handleWinner = (winner) => {
-    if (spinTimeoutRef.current) {
-      clearTimeout(spinTimeoutRef.current);
-      spinningSound.current.pause();
-      spinningSound.current.currentTime = 0;
-    }
-    winningSound.current.currentTime = 0;
-    winningSound.current.play();
-    setWinner(winner);
-    triggerConfetti();
   };
 
   const addSegment = () => {
@@ -178,7 +174,7 @@ const WheelSpinner = () => {
                 isOnlyOnce={false}
                 size={290}
                 upDuration={100}
-                downDuration={1000}
+                downDuration={WHEEL_DURATION}
                 onSpin={handleStartSpin}
               />
             </div>
