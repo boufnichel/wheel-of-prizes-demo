@@ -15,17 +15,29 @@ import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 import confetti from 'canvas-confetti';
 
+const SPINNING_SOUND = new Audio('/spinning.mp3');
+const WINNING_SOUND = new Audio('/winning.mp3');
+
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
-  const spinningSound = useRef(new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'));
-  const celebrationSound = useRef(new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'));
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
+
+  useEffect(() => {
+    // Preload sounds
+    SPINNING_SOUND.load();
+    WINNING_SOUND.load();
+
+    return () => {
+      SPINNING_SOUND.pause();
+      WINNING_SOUND.pause();
+    };
+  }, []);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -54,26 +66,18 @@ const WheelSpinner = () => {
     frame();
   };
 
-  const playSpinningSound = () => {
-    spinningSound.current.currentTime = 0;
-    spinningSound.current.play().catch(() => {});
-  };
-
-  const playCelebrationSound = () => {
-    celebrationSound.current.currentTime = 0;
-    celebrationSound.current.play().catch(() => {});
+  const handleStartSpin = () => {
+    SPINNING_SOUND.currentTime = 0;
+    SPINNING_SOUND.play().catch(() => {});
   };
 
   const handleWinner = (winner) => {
+    SPINNING_SOUND.pause();
+    SPINNING_SOUND.currentTime = 0;
+    WINNING_SOUND.currentTime = 0;
+    WINNING_SOUND.play().catch(() => {});
     setWinner(winner);
     triggerConfetti();
-    playCelebrationSound();
-  };
-
-  const handleSpin = () => {
-    if (segments.length > 0) {
-      playSpinningSound();
-    }
   };
 
   const addSegment = () => {
@@ -164,7 +168,7 @@ const WheelSpinner = () => {
                 size={290}
                 upDuration={100}
                 downDuration={1000}
-                onSpin={handleSpin}
+                onSpin={handleStartSpin}
               />
             </div>
           ) : (
