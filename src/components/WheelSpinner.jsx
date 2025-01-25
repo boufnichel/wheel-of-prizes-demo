@@ -26,13 +26,25 @@ const WheelSpinner = () => {
   
   useEffect(() => {
     setKey(prev => prev + 1);
+  }, [segments]);
 
-    // Cleanup function
+  // Event handler for overriding default button click
+  useEffect(() => {
+    const handleSpinClick = (e) => {
+      if (e.target.matches('button:not([class])') && e.target.textContent === 'SPIN') {
+        spinningSound.currentTime = 0;
+        spinningSound.play();
+      }
+    };
+
+    document.addEventListener('click', handleSpinClick);
+    
     return () => {
+      document.removeEventListener('click', handleSpinClick);
       spinningSound.pause();
       winningSound.pause();
     };
-  }, [segments]);
+  }, []);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -80,27 +92,6 @@ const WheelSpinner = () => {
   const removeSegment = (index) => {
     setSegments(segments.filter((_, i) => i !== index));
   };
-
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          const spinButton = document.querySelector('canvas + button');
-          if (spinButton) {
-            spinButton.addEventListener('click', () => {
-              spinningSound.currentTime = 0;
-              spinningSound.play();
-            });
-            observer.disconnect();
-          }
-        }
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <Container maxWidth="xl">
