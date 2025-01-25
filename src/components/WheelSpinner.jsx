@@ -205,10 +205,10 @@ const WheelSpinner = () => {
                 onFinished={handleWinner}
                 primaryColor="black"
                 contrastColor="white"
-                buttonText="SPIN"
+                buttonText="DEWER"
                 isOnlyOnce={false}
                 size={290}
-                upDuration={10}
+                upDuration={15}
                 downDuration={200}
               />
             </div>
