@@ -19,6 +19,13 @@ import confetti from 'canvas-confetti';
 
 const winningSound = new Audio('/winning.mp3');
 
+const COLORS = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFBE0B',
+  '#FB5607', '#FF006E', '#8338EC', '#3A86FF', '#38B000',
+  '#9381FF', '#B5179E', '#F15BB5', '#FEE440', '#00BBF9',
+  '#FF99C8', '#00F5D4', '#A0C4FF', '#D4A373', '#FF477E'
+];
+
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
@@ -53,6 +60,14 @@ const WheelSpinner = () => {
     }
   };
 
+  const getRandomColors = (count) => {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      colors.push(COLORS[Math.floor(Math.random() * COLORS.length)]);
+    }
+    return colors;
+  };
+
   const triggerConfetti = () => {
     const duration = 3000;
     const end = Date.now() + duration;
@@ -63,14 +78,14 @@ const WheelSpinner = () => {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+        colors: COLORS
       });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+        colors: COLORS
       });
 
       if (Date.now() < end) {
@@ -186,15 +201,15 @@ const WheelSpinner = () => {
             <div key={key}>
               <WheelComponent
                 segments={segments}
-                segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
+                segColors={getRandomColors(segments.length)}
                 onFinished={handleWinner}
                 primaryColor="black"
                 contrastColor="white"
                 buttonText="SPIN"
                 isOnlyOnce={false}
                 size={290}
-                upDuration={100}
-                downDuration={1000}
+                upDuration={50}
+                downDuration={600}
               />
             </div>
           ) : (
