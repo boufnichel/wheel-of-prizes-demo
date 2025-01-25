@@ -15,27 +15,26 @@ import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 import confetti from 'canvas-confetti';
 
-const SPINNING_SOUND = new Audio('/spinning.mp3');
-const WINNING_SOUND = new Audio('/winning.mp3');
-
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
+  const spinningSound = useRef(new Audio('/spinning.mp3'));
+  const winningSound = useRef(new Audio('/winning.mp3'));
+  const spinTimeoutRef = useRef(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
 
   useEffect(() => {
-    // Preload sounds
-    SPINNING_SOUND.load();
-    WINNING_SOUND.load();
-
     return () => {
-      SPINNING_SOUND.pause();
-      WINNING_SOUND.pause();
+      if (spinTimeoutRef.current) {
+        clearTimeout(spinTimeoutRef.current);
+      }
+      spinningSound.current.pause();
+      winningSound.current.pause();
     };
   }, []);
 
@@ -67,15 +66,27 @@ const WheelSpinner = () => {
   };
 
   const handleStartSpin = () => {
-    SPINNING_SOUND.currentTime = 0;
-    SPINNING_SOUND.play().catch(() => {});
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+    }
+    spinningSound.current.currentTime = 0;
+    spinningSound.current.play();
+    
+    // Set timeout to match wheel animation duration
+    spinTimeoutRef.current = setTimeout(() => {
+      spinningSound.current.pause();
+      spinningSound.current.currentTime = 0;
+    }, 3000);
   };
 
   const handleWinner = (winner) => {
-    SPINNING_SOUND.pause();
-    SPINNING_SOUND.currentTime = 0;
-    WINNING_SOUND.currentTime = 0;
-    WINNING_SOUND.play().catch(() => {});
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+      spinningSound.current.pause();
+      spinningSound.current.currentTime = 0;
+    }
+    winningSound.current.currentTime = 0;
+    winningSound.current.play();
     setWinner(winner);
     triggerConfetti();
   };
