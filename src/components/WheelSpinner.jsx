@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Box, 
   Button, 
@@ -23,10 +23,26 @@ const WheelSpinner = () => {
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
   const [winner, setWinner] = useState(null);
+  const spinButtonRef = useRef(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
+
+  useEffect(() => {
+    const button = document.querySelector('.wheel-spin-button');
+    if (button) {
+      button.addEventListener('click', handleStartSpin);
+    }
+
+    return () => {
+      if (button) {
+        button.removeEventListener('click', handleStartSpin);
+      }
+      spinningSound.pause();
+      winningSound.pause();
+    };
+  }, []);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -156,7 +172,6 @@ const WheelSpinner = () => {
                 size={290}
                 upDuration={100}
                 downDuration={1000}
-                onSpin={handleStartSpin}
               />
             </div>
           ) : (
