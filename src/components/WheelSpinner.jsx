@@ -6,19 +6,57 @@ import {
   IconButton, 
   Typography,
   Stack,
-  Container
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
-import { Add, Delete, Refresh } from '@mui/icons-material';
+import { Add, Delete, Refresh, Celebration } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
+import confetti from 'canvas-confetti';
 
 const WheelSpinner = () => {
   const [segments, setSegments] = useState([]);
   const [newSegment, setNewSegment] = useState('');
   const [key, setKey] = useState(0);
+  const [winner, setWinner] = useState(null);
   
   useEffect(() => {
     setKey(prev => prev + 1);
   }, [segments]);
+
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  };
+
+  const handleWinner = (winner) => {
+    setWinner(winner);
+    triggerConfetti();
+  };
 
   const addSegment = () => {
     if (newSegment.trim()) {
@@ -100,7 +138,7 @@ const WheelSpinner = () => {
               <WheelComponent
                 segments={segments}
                 segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
-                onFinished={(winner) => alert(`Winner: ${winner}`)}
+                onFinished={handleWinner}
                 primaryColor="black"
                 contrastColor="white"
                 buttonText="SPIN"
@@ -118,6 +156,33 @@ const WheelSpinner = () => {
           )}
         </Box>
       </Stack>
+
+      <Dialog
+        open={!!winner}
+        onClose={() => setWinner(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ textAlign: 'center' }}>
+          <Celebration sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+          <Typography variant="h4">We Have a Winner!</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="h3" align="center" color="primary" sx={{ my: 3 }}>
+            {winner}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button 
+            onClick={() => setWinner(null)} 
+            variant="contained" 
+            color="primary"
+            size="large"
+          >
+            Spin Again
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
