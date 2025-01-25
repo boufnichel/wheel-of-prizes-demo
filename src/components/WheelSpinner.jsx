@@ -1,4 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  IconButton, 
+  Typography,
+  Stack,
+  Container
+} from '@mui/material';
+import { Add, Delete, Refresh } from '@mui/icons-material';
 import WheelComponent from 'react-wheel-of-prizes';
 
 const WheelSpinner = () => {
@@ -22,46 +32,93 @@ const WheelSpinner = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-6">
-      <div className="mb-4">
-        <input
-          value={newSegment}
-          onChange={(e) => setNewSegment(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && addSegment()}
-          className="w-full p-2 border rounded"
-          placeholder="Add new segment"
-        />
-        <button onClick={addSegment} className="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-          Add Segment
-        </button>
-      </div>
+    <Container maxWidth="xl">
+      <Stack direction="row" spacing={4} alignItems="start" sx={{ mt: 4 }}>
+        {/* Left Panel - List Management */}
+        <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
+          <Typography variant="h5" gutterBottom>
+            Wheel Items
+          </Typography>
+          
+          <Stack spacing={3}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                fullWidth
+                value={newSegment}
+                onChange={(e) => setNewSegment(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addSegment()}
+                placeholder="Enter new item"
+                size="small"
+              />
+              <Button
+                variant="contained"
+                onClick={addSegment}
+                startIcon={<Add />}
+              >
+                Add
+              </Button>
+            </Box>
 
-      <div className="mb-4 max-h-40 overflow-y-auto">
-        {segments.map((segment, index) => (
-          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded mb-2">
-            <span>{segment}</span>
-            <button onClick={() => removeSegment(index)} className="text-red-500 hover:text-red-700">Remove</button>
-          </div>
-        ))}
-      </div>
+            <Stack spacing={1} sx={{ maxHeight: 400, overflow: 'auto' }}>
+              {segments.map((segment, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 2,
+                    bgcolor: 'grey.50',
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <Typography>{segment}</Typography>
+                  <IconButton
+                    onClick={() => removeSegment(index)}
+                    size="small"
+                    color="error"
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
+              ))}
+              
+              {segments.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                  <Refresh sx={{ mb: 1, opacity: 0.5 }} />
+                  <Typography>Add items to start spinning the wheel</Typography>
+                </Box>
+              )}
+            </Stack>
+          </Stack>
+        </Box>
 
-      {segments.length > 0 && (
-        <div key={key}>
-          <WheelComponent
-            segments={segments}
-            segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
-            onFinished={(winner) => alert(`Winner: ${winner}`)}
-            primaryColor="black"
-            contrastColor="white"
-            buttonText="SPIN"
-            isOnlyOnce={false}
-            size={290}
-            upDuration={100}
-            downDuration={1000}
-          />
-        </div>
-      )}
-    </div>
+        {/* Right Panel - Wheel */}
+        <Box flex={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {segments.length > 0 ? (
+            <div key={key}>
+              <WheelComponent
+                segments={segments}
+                segColors={['#EE4040', '#F0CF50', '#815CD1', '#3DA5E0', '#34A24F']}
+                onFinished={(winner) => alert(`Winner: ${winner}`)}
+                primaryColor="black"
+                contrastColor="white"
+                buttonText="SPIN"
+                isOnlyOnce={false}
+                size={290}
+                upDuration={100}
+                downDuration={1000}
+              />
+            </div>
+          ) : (
+            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+              <Refresh sx={{ fontSize: 40, mb: 2, opacity: 0.5 }} />
+              <Typography>Wheel will appear here</Typography>
+            </Box>
+          )}
+        </Box>
+      </Stack>
+    </Container>
   );
 };
 

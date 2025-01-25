@@ -11,7 +11,11 @@
   "dependencies": {
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "react-wheel-of-prizes": "1.0.9"
+    "react-wheel-of-prizes": "1.0.9",
+    "@mui/material": "~5.8.7",
+    "@mui/icons-material": "~5.8.4",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3"
   },
   "devDependencies": {
     "@types/react": "^16.9.56",
